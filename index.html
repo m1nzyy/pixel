@@ -1,75 +1,579 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<title>픽셀 그림 맞추기</title>
-<style>
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: sans-serif;
-    background: #f4f7fb;
-  }
-  .container { padding: 20px; text-align: center; }
-  .grid {
-    display: grid;
-    margin: 10px auto;
-    border: 2px solid #666;
-  }
-  .cell {
-    width: 40px;
-    height: 40px;
-    border: 1px solid #aaa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>픽셀 그림 맞추기</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+      background: #f4f7fb;
+      color: #22313a;
+    }
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 24px 18px 40px;
+    }
+    h1 {
+      text-align: center;
+      margin: 0 0 10px;
+      font-size: 34px;
+    }
+    .subtitle {
+      text-align: center;
+      margin: 0 0 18px;
+      color: #52626d;
+      line-height: 1.6;
+    }
+    .status-bar {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .badge {
+      background: white;
+      border-radius: 999px;
+      padding: 10px 16px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+      font-weight: 700;
+    }
+    .main {
+      display: flex;
+      gap: 22px;
+      align-items: flex-start;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      min-width: 320px;
+    }
+    .card h2 {
+      margin: 0 0 14px;
+      text-align: center;
+      font-size: 22px;
+    }
+    .arrow {
+      font-size: 48px;
+      font-weight: 700;
+      align-self: center;
+      color: #23323b;
+      margin-top: 80px;
+    }
+    .grid {
+      display: grid;
+      gap: 0;
+      border: 2px solid #66757f;
+      width: fit-content;
+      margin: 0 auto;
+      background: white;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    .cell {
+      width: 42px;
+      height: 42px;
+      border: 1px solid #aab5bc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 24px;
+    }
+    .question .cell {
+      background: #fafcfd;
+      color: #22313a;
+    }
+    .answer .cell {
+      cursor: pointer;
+      transition: transform 0.05s ease;
+      background: white;
+    }
+    .answer .cell:active {
+      transform: scale(0.97);
+    }
+    .toolbar {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 14px;
+      align-items: center;
+    }
+    .palette {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .color-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 3px solid transparent;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .color-btn.active {
+      border-color: #1f2d36;
+      transform: scale(1.08);
+    }
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    button, input[type="text"] {
+      font: inherit;
+    }
+    .btn {
+      border: none;
+      border-radius: 12px;
+      padding: 10px 16px;
+      background: #23323b;
+      color: white;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .btn.secondary {
+      background: #67757f;
+    }
+    .btn.success {
+      background: #1a8f5a;
+    }
+    .answer-box {
+      margin-top: 20px;
+      text-align: center;
+      display: none;
+    }
+    .answer-box.show {
+      display: block;
+    }
+    .answer-box p {
+      margin: 0 0 10px;
+      color: #4f5f69;
+    }
+    .name-row {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .name-input {
+      width: 230px;
+      max-width: 80vw;
+      padding: 10px 12px;
+      border: 2px solid #c8d2d8;
+      border-radius: 12px;
+      outline: none;
+    }
+    .message {
+      margin-top: 16px;
+      text-align: center;
+      min-height: 48px;
+      font-size: 18px;
+      font-weight: 700;
+      color: #23323b;
+      line-height: 1.5;
+    }
+    .hint {
+      text-align: center;
+      margin-top: 10px;
+      color: #67757f;
+      font-size: 14px;
+    }
+    .level-list {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+    .level-dot {
+      min-width: 38px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: #dbe5eb;
+      color: #50606b;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .level-dot.current {
+      background: #23323b;
+      color: white;
+    }
+    .level-dot.done {
+      background: #1a8f5a;
+      color: white;
+    }
+    @media (max-width: 900px) {
+      .arrow {
+        transform: rotate(90deg);
+        margin-top: 0;
+      }
+      .cell {
+        width: 36px;
+        height: 36px;
+        font-size: 20px;
+      }
+    }
+  </style>
 </head>
-
 <body>
-<div class="container">
-  <h1>픽셀 그림 맞추기</h1>
-  <div id="questionGrid" class="grid"></div>
-</div>
+  <div class="container">
+    <h1>픽셀 그림 맞추기</h1>
+    <p class="subtitle">
+      왼쪽 숫자 그림을 보고 오른쪽 칸을 색칠해 보세요.<br>
+      이번 버전은 모양뿐 아니라 색까지 정확히 맞아야 통과할 수 있어요.
+    </p>
 
-<script>
-const level = {
-  size: 5,
-  pattern: [
-    [0,1,0,1,0],
-    [1,1,1,1,1],
-    [0,1,1,1,0],
-    [0,0,1,0,0],
-    [0,0,1,0,0]
-  ]
-};
+    <div class="status-bar">
+      <div class="badge" id="levelBadge">현재 단계: 1단계</div>
+      <div class="badge" id="sizeBadge">격자 크기: 5 × 5</div>
+      <div class="badge" id="progressBadge">완료: 0 / 3</div>
+    </div>
 
-const grid = document.getElementById("questionGrid");
+    <div class="main">
+      <div class="card">
+        <h2>문제 그림</h2>
+        <div id="questionGrid" class="grid question"></div>
+        <div class="hint">숫자의 위치와 색을 모두 똑같이 맞춰 보세요.</div>
+      </div>
 
-function render() {
-  const size = level.size;
-  grid.style.gridTemplateColumns = `repeat(${size}, 40px)`;
+      <div class="arrow">➡</div>
 
-  for (let r = 0; r < size; r++) {
-    for (let c = 0; c < size; c++) {
-      const cell = document.createElement("div");
-      cell.className = "cell";
+      <div class="card">
+        <h2>색칠하는 칸</h2>
+        <div class="toolbar">
+          <div class="palette" id="palette"></div>
+          <div class="controls">
+            <button class="btn secondary" id="clearBtn">전체 지우기</button>
+            <button class="btn success" id="checkBtn">색칠 확인</button>
+          </div>
+        </div>
 
-      if (level.pattern[r][c] === 1) {
-        cell.textContent = "1";
-      } else {
-        cell.textContent = "0";  // ✅ 여기 수정됨
-        cell.style.color = "#ccc"; // (선택) 흐리게
+        <div id="answerGrid" class="grid answer"></div>
+
+        <div id="answerBox" class="answer-box">
+          <p id="hintText">힌트: ㅎㅌ</p>
+          <div class="name-row">
+            <input type="text" id="nameInput" class="name-input" placeholder="그림 이름을 입력하세요" />
+            <button class="btn" id="submitNameBtn">제출</button>
+          </div>
+        </div>
+
+        <div class="message" id="message"></div>
+      </div>
+    </div>
+
+    <div class="level-list" id="levelList"></div>
+  </div>
+
+  <script>
+    const levels = [
+      {
+        size: 5,
+        displayName: "하트",
+        hint: "ㅎㅌ",
+        answers: ["하트","heart"],
+        pattern: [
+          [0,1,0,1,0],
+          [1,1,1,1,1],
+          [0,1,1,1,0],
+          [0,0,1,0,0],
+          [0,0,1,0,0]
+        ],
+        colors: [
+          [null,"#ff4d4f",null,"#ff4d4f",null],
+          ["#ff4d4f","#ff4d4f","#ff4d4f","#ff4d4f","#ff4d4f"],
+          [null,"#ff4d4f","#ff4d4f","#ff4d4f",null],
+          [null,null,"#ff4d4f",null,null],
+          [null,null,"#ff4d4f",null,null]
+        ]
+      },
+      {
+        size: 6,
+        displayName: "수박",
+        hint: "과일",
+        answers: ["수박"],
+        pattern: [
+          [0,0,1,1,0,0],
+          [0,1,1,1,1,0],
+          [1,1,1,1,1,1],
+          [1,1,1,1,1,1],
+          [1,1,1,1,1,1],
+          [0,1,1,1,1,0]
+        ],
+        colors: [
+          [null,null,"#ff4d4f","#ff4d4f",null,null],
+          [null,"#ff4d4f","#ff4d4f","#5f3dc4","#ff4d4f",null],
+          ["#ff4d4f","#ff4d4f","#ff4d4f","#ff4d4f","#ff4d4f","#ff4d4f"],
+          ["#ff4d4f","#ff4d4f","#5f3dc4","#ff4d4f","#ff4d4f","#ff4d4f"],
+          ["#51cf66","#ff4d4f","#ff4d4f","#ff4d4f","#ff4d4f","#51cf66"],
+          [null,"#51cf66","#51cf66","#51cf66","#51cf66",null]
+        ]
+      },
+      {
+        size: 7,
+        displayName: "얼굴",
+        hint: "ㅇㄱ",
+        answers: ["얼굴","face"],
+        pattern: [
+          [0,0,1,1,1,0,0],
+          [0,1,0,0,0,1,0],
+          [1,0,1,0,1,0,1],
+          [1,0,0,0,0,0,1],
+          [1,0,1,1,1,0,1],
+          [0,1,0,0,0,1,0],
+          [0,0,1,1,1,0,0]
+        ],
+        colors: [
+          [null,null,"#ffd43b","#ffd43b","#ffd43b",null,null],
+          [null,"#ffd43b",null,null,null,"#ffd43b",null],
+          ["#ffd43b",null,"#339af0",null,"#339af0",null,"#ffd43b"],
+          ["#ffd43b",null,null,null,null,null,"#ffd43b"],
+          ["#ffd43b",null,"#ff4d4f","#ff4d4f","#ff4d4f",null,"#ffd43b"],
+          [null,"#ffd43b",null,null,null,"#ffd43b",null],
+          [null,null,"#ffd43b","#ffd43b","#ffd43b",null,null]
+        ]
+      }
+    ];
+
+    const rainbowColors = [
+      { name: "빨강", value: "#ff4d4f" },
+      { name: "주황", value: "#ff922b" },
+      { name: "노랑", value: "#ffd43b" },
+      { name: "초록", value: "#51cf66" },
+      { name: "파랑", value: "#339af0" },
+      { name: "남색", value: "#5f3dc4" },
+      { name: "보라", value: "#cc5de8" }
+    ];
+
+    let currentLevel = 0;
+    let currentColor = rainbowColors[0].value;
+    let student = [];
+    let solvedLevels = new Set();
+    let answerUnlocked = false;
+
+    const questionGrid = document.getElementById("questionGrid");
+    const answerGrid = document.getElementById("answerGrid");
+    const palette = document.getElementById("palette");
+    const levelBadge = document.getElementById("levelBadge");
+    const sizeBadge = document.getElementById("sizeBadge");
+    const progressBadge = document.getElementById("progressBadge");
+    const levelList = document.getElementById("levelList");
+    const message = document.getElementById("message");
+    const answerBox = document.getElementById("answerBox");
+    const nameInput = document.getElementById("nameInput");
+    const hintText = document.getElementById("hintText");
+
+    document.getElementById("clearBtn").addEventListener("click", clearGrid);
+    document.getElementById("checkBtn").addEventListener("click", checkPattern);
+    document.getElementById("submitNameBtn").addEventListener("click", submitName);
+
+    nameInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") submitName();
+    });
+
+    function normalizeText(text) {
+      return (text || "").trim().toLowerCase().replace(/\s+/g, "");
+    }
+
+    function setupPalette() {
+      palette.innerHTML = "";
+      rainbowColors.forEach((color, index) => {
+        const btn = document.createElement("button");
+        btn.className = "color-btn" + (index === 0 ? " active" : "");
+        btn.style.background = color.value;
+        btn.title = color.name;
+        btn.addEventListener("click", () => {
+          currentColor = color.value;
+          document.querySelectorAll(".color-btn").forEach(el => el.classList.remove("active"));
+          btn.classList.add("active");
+        });
+        palette.appendChild(btn);
+      });
+    }
+
+    function updateStatus() {
+      const level = levels[currentLevel];
+      levelBadge.textContent = `현재 단계: ${currentLevel + 1}단계`;
+      sizeBadge.textContent = `격자 크기: ${level.size} × ${level.size}`;
+      progressBadge.textContent = `완료: ${solvedLevels.size} / ${levels.length}`;
+    }
+
+    function renderLevelList() {
+      levelList.innerHTML = "";
+      levels.forEach((level, index) => {
+        const item = document.createElement("div");
+        item.className = "level-dot";
+        item.textContent = `${level.size}×${level.size}`;
+        if (index === currentLevel) item.classList.add("current");
+        if (solvedLevels.has(index)) item.classList.add("done");
+        levelList.appendChild(item);
+      });
+    }
+
+    function setGridStyle(gridEl, size) {
+      const cellSize = size >= 7 ? 38 : 42;
+      gridEl.style.gridTemplateColumns = `repeat(${size}, ${cellSize}px)`;
+      gridEl.style.gridTemplateRows = `repeat(${size}, ${cellSize}px)`;
+    }
+
+    function initStudent(size) {
+      student = Array.from({ length: size }, () => Array(size).fill(null));
+    }
+
+    function loadLevel(index) {
+      currentLevel = index;
+      answerUnlocked = false;
+      answerBox.classList.remove("show");
+      nameInput.value = "";
+      message.textContent = "";
+      hintText.textContent = `힌트: ${levels[currentLevel].hint}`;
+      const size = levels[currentLevel].size;
+      initStudent(size);
+      updateStatus();
+      renderLevelList();
+      renderQuestionGrid();
+      renderAnswerGrid();
+    }
+
+    function renderQuestionGrid() {
+      const level = levels[currentLevel];
+      const size = level.size;
+      setGridStyle(questionGrid, size);
+      questionGrid.innerHTML = "";
+
+      for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size; c++) {
+          const cell = document.createElement("div");
+          cell.className = "cell";
+          if (level.pattern[r][c]) {
+            cell.textContent = "1";
+            const color = level.colors?.[r]?.[c];
+            if (color) {
+              cell.style.color = color === "#ffffff" ? "#adb5bd" : color;
+            }
+          } else {
+            cell.textContent = "0";
+            cell.style.color = "#b8c4cc";
+          }
+          questionGrid.appendChild(cell);
+        }
+      }
+    }
+
+    function applyPaint(r, c) {
+      if (answerUnlocked) return;
+      student[r][c] = student[r][c] === null ? currentColor : null;
+      renderAnswerGrid();
+    }
+
+    function renderAnswerGrid() {
+      const level = levels[currentLevel];
+      const size = level.size;
+      setGridStyle(answerGrid, size);
+      answerGrid.innerHTML = "";
+
+      for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size; c++) {
+          const cell = document.createElement("div");
+          cell.className = "cell";
+          if (student[r][c]) {
+            cell.style.background = student[r][c];
+          }
+
+          cell.addEventListener("click", () => {
+            applyPaint(r, c);
+          });
+
+          answerGrid.appendChild(cell);
+        }
+      }
+    }
+
+    function clearGrid() {
+      if (answerUnlocked) return;
+      initStudent(levels[currentLevel].size);
+      renderAnswerGrid();
+      message.textContent = "";
+    }
+
+    function checkPattern() {
+      const level = levels[currentLevel];
+      const size = level.size;
+
+      for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size; c++) {
+          const expectedFilled = level.pattern[r][c] === 1;
+          const studentFilled = student[r][c] !== null;
+
+          if (expectedFilled !== studentFilled) {
+            message.textContent = "모양이 아직 완성되지 않았어요. 빈칸 위치를 다시 확인해 보세요.";
+            answerBox.classList.remove("show");
+            return;
+          }
+
+          if (expectedFilled) {
+            const expectedColor = (level.colors?.[r]?.[c] || "").toLowerCase();
+            const studentColor = (student[r][c] || "").toLowerCase();
+            if (expectedColor !== studentColor) {
+              message.textContent = "모양은 맞지만 색이 다른 칸이 있어요. 문제 그림의 숫자 색을 다시 살펴보세요.";
+              answerBox.classList.remove("show");
+              return;
+            }
+          }
+        }
       }
 
-      grid.appendChild(cell);
+      answerUnlocked = true;
+      answerBox.classList.add("show");
+      message.textContent = "색과 모양이 모두 맞았어요! 힌트를 보고 그림 이름을 제출해 보세요.";
+      nameInput.focus();
     }
-  }
-}
 
-render();
-</script>
+    function submitName() {
+      if (!answerUnlocked) {
+        message.textContent = "먼저 색칠 확인 버튼을 눌러 주세요.";
+        return;
+      }
+
+      const input = normalizeText(nameInput.value);
+      const level = levels[currentLevel];
+      const correct = level.answers.some(ans => normalizeText(ans) === input);
+
+      if (!correct) {
+        message.textContent = `정답이 아니에요. 힌트: ${level.hint}`;
+        return;
+      }
+
+      solvedLevels.add(currentLevel);
+
+      if (currentLevel < levels.length - 1) {
+        message.textContent = `정답! ${level.displayName}를 맞혔어요. 다음은 ${levels[currentLevel + 1].size}×${levels[currentLevel + 1].size} 단계예요!`;
+        setTimeout(() => {
+          loadLevel(currentLevel + 1);
+        }, 1200);
+      } else {
+        updateStatus();
+        renderLevelList();
+        answerBox.classList.remove("show");
+        message.textContent = "축하합니다! 5×5부터 7×7까지 모두 클리어했어요!";
+      }
+    }
+
+    setupPalette();
+    loadLevel(0);
+  </script>
 </body>
 </html>
